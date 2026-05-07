@@ -11,11 +11,11 @@
     <img src="https://img.shields.io/badge/iPadOS-17.0+-8e44ad.svg" />
 </p>
 
-It supports:
-- iOS 17+
-- iPadOS 17+ (via iOS platform support)
+<p align="center">
+  <video src="Assets/demo.mp4" controls muted playsinline width="100%"></video>
+</p>
 
-You provide versioned notes, then control presentation with `NoteletPresentedVersion`.
+
 
 ---
 
