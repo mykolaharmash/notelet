@@ -12,7 +12,7 @@
 </p>
 
 <p align="center">
-  <video src="Assets/demo.mp4" controls muted playsinline width="100%"></video>
+  <video src="Assets/demo.mp4" controls muted playsinline height="600px" width="auto"></video>
 </p>
 
 
