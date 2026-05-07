@@ -1,6 +1,15 @@
-# Notelet
+<p align="center">
+  <img src="Assets/logo.png" alt="Notelet logo" width="84" height="84" />
+</p>
 
-Notelet is a tiny SwiftUI package for showing "what's new" notes in a sheet.
+<h3 align="center">Notelet</h3>
+
+<p align="center">SwiftUI package for showing "What's New" notes in iOS apps</p>
+
+<p align="center">
+    <img src="https://img.shields.io/badge/iOS-17.0+-2980b9.svg" />
+    <img src="https://img.shields.io/badge/iPadOS-17.0+-8e44ad.svg" />
+</p>
 
 It supports:
 - iOS 17+
@@ -15,10 +24,10 @@ You provide versioned notes, then present the sheet either for the current app v
 ### Swift Package Manager (Xcode)
 
 1. In Xcode, open your app project.
-2. Go to **File -> Add Package Dependencies...**
-3. Add this repository URL.
-4. Choose a version/range.
-5. Add the `Notelet` product to your app target.
+2. Go to **File → Add Package Dependencies...**.
+3. Enter the repo URL https://github.com/mykolaharmash/notelet into the search.
+4. Click on "Add package".
+5. Add `Notelet` your app target.
 
 ---
 
