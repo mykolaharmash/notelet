@@ -40,18 +40,9 @@ public struct NoteletVersionNotes: Sendable, Codable {
     let items: [NoteletVersionNoteItem]
 }
 
-public enum NoteletSheetItem: Hashable, Identifiable {
-    public var id: String {
-        switch self {
-        case .currentVersion:
-            Helpers.getCurrentAppVersion()
-        case .specificVersion(let version):
-            version
-        }
-    }
-    
-    case currentVersion
-    case specificVersion(String)
+public enum NoteletPresentedVersion: Sendable, Hashable {
+    case current
+    case v(String)
 }
 
 public struct NoteletConfiguration {

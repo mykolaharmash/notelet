@@ -15,7 +15,7 @@ It supports:
 - iOS 17+
 - iPadOS 17+ (via iOS platform support)
 
-You provide versioned notes, then present the sheet either for the current app version or for a specific version.
+You provide versioned notes, then control presentation with `NoteletPresentedVersion`.
 
 ---
 
@@ -78,7 +78,7 @@ private let releaseNotes: [NoteletVersionNotes] = [
 ### 2) Add presentation state
 
 ```swift
-@State private var noteletSheetItem: NoteletSheetItem?
+@State private var presentedVersion: NoteletPresentedVersion? = nil
 ```
 
 ### 3) Attach the sheet modifier
@@ -86,7 +86,7 @@ private let releaseNotes: [NoteletVersionNotes] = [
 ```swift
 .noteletSheet(
     notes: releaseNotes,
-    item: $noteletSheetItem
+    version: presentedVersion
 )
 ```
 
@@ -94,7 +94,7 @@ private let releaseNotes: [NoteletVersionNotes] = [
 
 ```swift
 .onAppear {
-    noteletSheetItem = .currentVersion
+    presentedVersion = .current
 }
 ```
 
@@ -102,7 +102,7 @@ private let releaseNotes: [NoteletVersionNotes] = [
 
 ```swift
 Button("Show What's New 1.2.0") {
-    noteletSheetItem = .specificVersion("1.2.0")
+    presentedVersion = .v("1.2.0")
 }
 ```
 
@@ -113,7 +113,7 @@ import SwiftUI
 import Notelet
 
 struct ContentView: View {
-    @State private var noteletSheetItem: NoteletSheetItem?
+    @State private var presentedVersion: NoteletPresentedVersion? = nil
 
     private let notes: [NoteletVersionNotes] = [
         .init(
@@ -152,21 +152,26 @@ struct ContentView: View {
 
     var body: some View {
         VStack(spacing: 16) {
-            Button("Show What's New (Specific Version)") {
-                noteletSheetItem = .specificVersion("1.2.0")
+            Button("Show What's New (1.2.0)") {
+                presentedVersion = .v("1.2.0")
             }
         }
         .onAppear {
-            // Auto-present for the app's current version
-            noteletSheetItem = .currentVersion
+            presentedVersion = .current
         }
         .noteletSheet(
             notes: notes,
-            item: $noteletSheetItem
+            version: presentedVersion,
+            onDismiss: { presentedVersion = nil }
         )
     }
 }
 ```
+
+`version` behavior:
+- `.current` -> tries to show notes for the current app version
+- `.v("1.2.0")` -> tries to show notes for that specific version
+- `nil` -> keeps the sheet hidden
 
 ---
 
@@ -230,7 +235,7 @@ You can customize button labels and accent color with `NoteletConfiguration`:
 ```swift
 .noteletSheet(
     notes: notes,
-    item: $noteletSheetItem,
+    version: .current,
     configuration: .init(
         nextButtonLabel: "Continue",
         doneButtonLabel: "Got it",
@@ -252,7 +257,8 @@ Notelet stores the latest seen version in `UserDefaults` using:
 
 `NOTELET_APP_STORAGE_LATEST_SEEN_APP_VERSION_KEY`
 
-That value is used when presenting `.currentVersion`.
+That value is used when presenting with `version: .current`.
+When the sheet is dismissed in current-version mode, Notelet marks the current app version as seen automatically.
 
 You can set it manually if needed, for example after onboarding, so the sheet does not appear immediately for new users:
 
@@ -267,4 +273,4 @@ UserDefaults.standard.set(
 
 A common pattern:
 - After onboarding finishes, set the key to the current app version.
-- Later, when a new app version ships, `.currentVersion` can show only fresh notes.
+- Later, when a new app version ships, `version: .current` can show only fresh notes.

@@ -8,69 +8,102 @@
 import SwiftUI
 
 struct NoteletSheet: ViewModifier {
+    @State private var isPresented = false
 
     let notes: [NoteletVersionNotes]
-    let item: Binding<NoteletSheetItem?>
+    let version: NoteletPresentedVersion?
     let onDismiss: () -> Void
     let configuration: NoteletConfiguration
 
-    private var presentableItem: Binding<NoteletSheetItem?> {
-        Binding(
-            get: {
-                guard let item = item.wrappedValue, shouldPresent(item) else {
-                    return nil
-                }
-
-                return item
-            },
-            set: { newValue in
-                item.wrappedValue = newValue
-            }
-        )
+    private var versionToShow: String? {
+        switch version {
+        case .current:
+            Helpers.getCurrentAppVersion()
+        case .v(let providedVersion):
+            providedVersion
+        case nil:
+            nil
+        }
     }
 
-    private func shouldPresent(_ item: NoteletSheetItem) -> Bool {
-        guard !Helpers.getVersionNotes(for: item, in: notes).isEmpty else {
+    private var versionNotes: [NoteletVersionNoteItem] {
+        guard let versionToShow else {
+            return []
+        }
+
+        return Helpers.getVersionNotes(for: versionToShow, in: notes)
+    }
+
+    private var isCurrentVersionMode: Bool {
+        if case .current = version {
+            return true
+        }
+
+        return false
+    }
+
+    private var isCurrentVersionAlreadySeen: Bool {
+        UserDefaults.standard.string(
+            forKey: NOTELET_APP_STORAGE_LATEST_SEEN_APP_VERSION_KEY
+        ) == Helpers.getCurrentAppVersion()
+    }
+
+    private var shouldPresent: Bool {
+        guard version != nil else {
             return false
         }
 
-        switch item {
-        case .currentVersion:
-            let version = Helpers.getCurrentAppVersion()
-            
-            let latestSeenVersion = UserDefaults.standard.string(
-                forKey: NOTELET_APP_STORAGE_LATEST_SEEN_APP_VERSION_KEY
-            )
-            
-            return latestSeenVersion != version
-        case .specificVersion:
-            return true
+        guard !versionNotes.isEmpty else {
+            return false
         }
+
+        if isCurrentVersionMode {
+            return !isCurrentVersionAlreadySeen
+        }
+
+        return true
     }
+
     
     func body(content: Content) -> some View {
         content
-            .sheet(item: presentableItem, onDismiss: onDismiss) { item in
+            .onAppear {
+                isPresented = shouldPresent
+            }
+            .onChange(of: version) {
+                isPresented = shouldPresent
+            }
+            .sheet(isPresented: $isPresented, onDismiss: handleDismiss) {
                 NoteletSheetContentView(
-                    notes: notes,
-                    sheetItem: item,
+                    versionNotes: versionNotes,
                     configuration: configuration
                 )
             }
+    }
+    
+    private func handleDismiss() {
+        if isCurrentVersionMode {
+            UserDefaults.standard.set(
+                Helpers.getCurrentAppVersion(),
+                forKey: NOTELET_APP_STORAGE_LATEST_SEEN_APP_VERSION_KEY
+            )
+        }
+        
+        onDismiss()
     }
 }
 
 extension View {
     public func noteletSheet(
         notes: [NoteletVersionNotes],
-        item: Binding<NoteletSheetItem?>,
+        version: NoteletPresentedVersion? = nil,
         onDismiss: @escaping () -> Void = { },
         configuration: NoteletConfiguration = .init()
     ) -> some View {
         modifier(
             NoteletSheet(
                 notes: notes,
-                item: item,
+                version: version,
                 onDismiss: onDismiss,
                 configuration: configuration
             )

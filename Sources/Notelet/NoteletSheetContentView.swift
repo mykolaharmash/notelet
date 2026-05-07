@@ -8,8 +8,7 @@
 import SwiftUI
 
 struct NoteletSheetContentView: View {
-    let notes: [NoteletVersionNotes]
-    let sheetItem: NoteletSheetItem
+    let versionNotes: [NoteletVersionNoteItem]
     let configuration: NoteletConfiguration
     
     @State private var selectedPageID: Int? = 0
@@ -36,7 +35,6 @@ struct NoteletSheetContentView: View {
     }
     
     var body: some View {
-        let versionNotes = Helpers.getVersionNotes(for: sheetItem, in: notes)
         let isOnLastPage = isOnLastPage(versionNotes: versionNotes, currentPage: currentPage)
         
         NavigationStack {
@@ -110,14 +108,9 @@ struct NoteletSheetContentView: View {
         ])
         .presentationDragIndicator(.visible)
         .presentationBackground(sheetBackgroundStyle)
-        .onDisappear {
-            saveCurrentVersionAsSeenIfNeeded()
-        }
     }
     
     private func onDoneTap() {
-        saveCurrentVersionAsSeenIfNeeded()
-
         dismiss()
     }
     
@@ -127,14 +120,5 @@ struct NoteletSheetContentView: View {
         }
 
         return currentPage >= versionNotes.count - 1
-    }
-
-    private func saveCurrentVersionAsSeenIfNeeded() {
-        if case .currentVersion = sheetItem {
-            UserDefaults.standard.set(
-                Helpers.getCurrentAppVersion(),
-                forKey: NOTELET_APP_STORAGE_LATEST_SEEN_APP_VERSION_KEY
-            )
-        }
     }
 }
