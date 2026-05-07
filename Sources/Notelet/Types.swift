@@ -8,16 +8,16 @@
 import Foundation
 import SwiftUI
 
-public enum NoteletVersionNoteItem: Codable {
+public enum NoteletVersionNoteItem: Sendable, Codable {
     case media(kind: MediaKind, url: URL, title: LocalizedStringResource, description: LocalizedStringResource)
     case list(title: LocalizedStringResource, rows: [ListRow])
     
-    public enum MediaKind: Codable {
+    public enum MediaKind: Sendable, Codable {
         case image
         case video
     }
     
-    public struct ListRow: Codable {
+    public struct ListRow: Sendable, Codable {
         public init(symbolSystemName: String, title: LocalizedStringResource, description: LocalizedStringResource) {
             self.symbolSystemName = symbolSystemName
             self.title = title
@@ -30,7 +30,7 @@ public enum NoteletVersionNoteItem: Codable {
     }
 }
 
-public struct NoteletVersionNotes: Codable {
+public struct NoteletVersionNotes: Sendable, Codable {
     public init(version: String, items: [NoteletVersionNoteItem]) {
         self.version = version
         self.items = items
