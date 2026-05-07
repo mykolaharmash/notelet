@@ -28,7 +28,7 @@ struct NoteletSheetContentView: View {
         if #available(iOS 26, *) {
             let color: Color = colorScheme == .dark ? .black : .white
             
-            return AnyShapeStyle(color.opacity(0.45))
+            return AnyShapeStyle(color.opacity(0.55))
         }
 
         return AnyShapeStyle(.regularMaterial)
