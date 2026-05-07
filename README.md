@@ -265,10 +265,7 @@ You can set it manually if needed, for example after onboarding, so the sheet do
 ```swift
 import Notelet
 
-UserDefaults.standard.set(
-    "1.2.0",
-    forKey: NOTELET_APP_STORAGE_LATEST_SEEN_APP_VERSION_KEY
-)
+noteletMarkCurrentVersionAsSeen()
 ```
 
 A common pattern:
