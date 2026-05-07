@@ -83,7 +83,7 @@ struct NoteletSheet: ViewModifier {
     
     private func handleDismiss() {
         if isCurrentVersionMode {
-            noteletMarkCurrentVersionAsSeen()
+            NoteletStorage.markCurrentVersionAsSeen()
         }
         
         onDismiss()

@@ -265,7 +265,7 @@ You can set it manually if needed, for example after onboarding, so the sheet do
 ```swift
 import Notelet
 
-noteletMarkCurrentVersionAsSeen()
+NoteletStorage.markCurrentVersionAsSeen()
 ```
 
 A common pattern:
