@@ -42,5 +42,6 @@ struct BulletListNoteItemView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 40)
         .padding(.top, 64)
+        .padding(.bottom, 64)
     }
 }
