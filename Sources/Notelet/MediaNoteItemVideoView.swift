@@ -22,7 +22,7 @@ struct MediaNoteItemVideoView: View {
         ZStack {
             AspectFillVideoPlayer(player: player)
                 .opacity(isVideoLoading ? 0 : 1)
-            
+
             if isVideoLoading {
                 ProgressView()
             }
@@ -33,9 +33,17 @@ struct MediaNoteItemVideoView: View {
         .onChange(of: isPlaying) {
             updatePlaybackState()
         }
+        .onDisappear {
+            videoStatusObserver?.invalidate()
+            videoStatusObserver = nil
+            player?.pause()
+        }
     }
-    
+
     private func prepareVideo() async {
+        videoStatusObserver?.invalidate()
+        videoStatusObserver = nil
+
         isVideoLoading = true
 
         let asset = AVURLAsset(url: videoURL)
