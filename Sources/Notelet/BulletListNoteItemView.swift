@@ -10,7 +10,7 @@ import SwiftUI
 struct BulletListNoteItemView: View {
     let title: LocalizedStringResource
     let rows: [NoteletVersionNoteItem.ListRow]
-    let accentColor: Color
+    let accentColor: UIColor
     
     var body: some View {
         VStack(alignment: .leading, spacing: 40) {
@@ -24,7 +24,7 @@ struct BulletListNoteItemView: View {
                         Image(systemName: row.symbolSystemName)
                             .symbolRenderingMode(.hierarchical)
                             .font(.system(size: 32).weight(.semibold))
-                            .foregroundStyle(accentColor)
+                            .foregroundStyle(Color(accentColor))
                             .frame(width: 48, alignment: .center)
                         
                         VStack(alignment: .leading, spacing: 2) {
