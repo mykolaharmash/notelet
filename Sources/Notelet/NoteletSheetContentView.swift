@@ -15,24 +15,6 @@ struct NoteletSheetContentView: View {
 
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var colorScheme
-
-    private var currentPage: Int {
-        return selectedPageID ?? 0
-    }
-    
-    private var isIPad: Bool {
-        UIDevice.current.userInterfaceIdiom == .pad
-    }
-
-    private var sheetBackgroundStyle: AnyShapeStyle {
-        if #available(iOS 26, *) {
-            let color: Color = colorScheme == .dark ? .black : .white
-            
-            return AnyShapeStyle(color.opacity(0.55))
-        }
-
-        return AnyShapeStyle(.regularMaterial)
-    }
     
     var body: some View {
         let isOnLastPage = isOnLastPage(versionNotes: versionNotes, currentPage: currentPage)
@@ -97,28 +79,35 @@ struct NoteletSheetContentView: View {
                         }
                         .buttonStyle(.borderedProminent)
                         .padding(.horizontal, 28)
-                        .tint(configuration.accentColor)
+                        .tint(Color(configuration.accentColor))
                     }
                 }
                 .safeAreaPadding(.bottom, isIPad ? 24 : 0)
             }
         )
-        .presentationDetents([
-            isIPad ? .large : .fraction(0.85)
-        ])
-        .presentationDragIndicator(.visible)
-        .presentationBackground(sheetBackgroundStyle)
+    }
+}
+
+private extension NoteletSheetContentView {
+    
+    var isIPad: Bool {
+        UIDevice.current.userInterfaceIdiom == .pad
     }
     
-    private func onDoneTap() {
+    var currentPage: Int {
+        selectedPageID ?? 0
+    }
+    
+    func onDoneTap() {
         dismiss()
     }
     
-    private func isOnLastPage(versionNotes: [NoteletVersionNoteItem], currentPage: Int) -> Bool {
+    func isOnLastPage(versionNotes: [NoteletVersionNoteItem], currentPage: Int) -> Bool {
         guard !versionNotes.isEmpty else {
             return true
         }
 
         return currentPage >= versionNotes.count - 1
     }
+    
 }

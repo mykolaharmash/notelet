@@ -8,86 +8,67 @@
 import SwiftUI
 
 struct NoteletSheet: ViewModifier {
-    @State private var isPresented = false
+    
+    @Environment(\.colorScheme)
+    private var colorScheme
+    
+    @State
+    private var isPresented = false
+    
+    @State
+    private var resolved: NoteletPresenter.Resolved?
 
     let notes: [NoteletVersionNotes]
     let version: NoteletPresentedVersion?
     let onDismiss: () -> Void
     let configuration: NoteletConfiguration
+    let sheetFractionHeight: CGFloat
 
-    private var versionToShow: String? {
-        switch version {
-        case .current:
-            Helpers.getCurrentAppVersion()
-        case .v(let providedVersion):
-            providedVersion
-        case nil:
-            nil
-        }
-    }
-
-    private var versionNotes: [NoteletVersionNoteItem] {
-        guard let versionToShow else {
-            return []
-        }
-
-        return Helpers.getVersionNotes(for: versionToShow, in: notes)
-    }
-
-    private var isCurrentVersionMode: Bool {
-        if case .current = version {
-            return true
-        }
-
-        return false
-    }
-
-    private var isCurrentVersionAlreadySeen: Bool {
-        UserDefaults.standard.string(
-            forKey: NOTELET_APP_STORAGE_LATEST_SEEN_APP_VERSION_KEY
-        ) == Helpers.getCurrentAppVersion()
-    }
-
-    private var shouldPresent: Bool {
-        guard version != nil else {
-            return false
-        }
-
-        guard !versionNotes.isEmpty else {
-            return false
-        }
-
-        if isCurrentVersionMode {
-            return !isCurrentVersionAlreadySeen
-        }
-
-        return true
-    }
-
-    
     func body(content: Content) -> some View {
         content
             .onAppear {
-                isPresented = shouldPresent
+                resolved = NoteletPresenter.resolve(notes: notes, version: version)
+                isPresented = resolved != nil
             }
             .onChange(of: version) {
-                isPresented = shouldPresent
+                resolved = NoteletPresenter.resolve(notes: notes, version: version)
+                isPresented = resolved != nil
             }
             .sheet(isPresented: $isPresented, onDismiss: handleDismiss) {
                 NoteletSheetContentView(
-                    versionNotes: versionNotes,
+                    versionNotes: resolved?.versionNotes ?? [],
                     configuration: configuration
                 )
+                .presentationDetents([
+                    isIPad ? .large : .fraction(sheetFractionHeight)
+                ])
+                .presentationDragIndicator(.visible)
+                .presentationBackground(sheetBackgroundStyle)
             }
     }
+}
+
+private extension NoteletSheet {
     
-    private func handleDismiss() {
-        if isCurrentVersionMode {
+    var isIPad: Bool {
+        UIDevice.current.userInterfaceIdiom == .pad
+    }
+    
+    var sheetBackgroundStyle: AnyShapeStyle {
+        if #available(iOS 26, *) {
+            let color: Color = colorScheme == .dark ? .black : .white
+            return AnyShapeStyle(color.opacity(0.55))
+        }
+        return AnyShapeStyle(.regularMaterial)
+    }
+
+    func handleDismiss() {
+        if resolved?.isCurrentVersionMode == true {
             NoteletStorage.markCurrentVersionAsSeen()
         }
-        
         onDismiss()
     }
+    
 }
 
 extension View {
@@ -95,14 +76,16 @@ extension View {
         notes: [NoteletVersionNotes],
         version: NoteletPresentedVersion? = nil,
         onDismiss: @escaping () -> Void = { },
-        configuration: NoteletConfiguration = .init()
+        configuration: NoteletConfiguration = .init(),
+        sheetFractionHeight: CGFloat = 0.85
     ) -> some View {
         modifier(
             NoteletSheet(
                 notes: notes,
                 version: version,
                 onDismiss: onDismiss,
-                configuration: configuration
+                configuration: configuration,
+                sheetFractionHeight: sheetFractionHeight
             )
         )
     }
