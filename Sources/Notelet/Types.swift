@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftUI
+import UIKit
 
 public enum NoteletVersionNoteItem: Sendable, Codable {
     case media(kind: MediaKind, url: URL, title: LocalizedStringResource, description: LocalizedStringResource)
@@ -45,15 +46,16 @@ public enum NoteletPresentedVersion: Sendable, Hashable {
     case v(String)
 }
 
-public struct NoteletConfiguration {
+public struct NoteletConfiguration: Sendable {
     let nextButtonLabel: LocalizedStringResource
     let doneButtonLabel: LocalizedStringResource
-    let accentColor: Color
+    /// Uses `UIColor` so the same configuration works from SwiftUI and UIKit.
+    let accentColor: UIColor
     
     public init(
         nextButtonLabel: LocalizedStringResource = "Next",
         doneButtonLabel: LocalizedStringResource = "Done",
-        accentColor: Color = .blue
+        accentColor: UIColor = .tintColor
     ) {
         self.nextButtonLabel = nextButtonLabel
         self.doneButtonLabel = doneButtonLabel
