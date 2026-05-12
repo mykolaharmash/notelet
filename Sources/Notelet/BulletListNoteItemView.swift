@@ -26,6 +26,7 @@ struct BulletListNoteItemView: View {
                             .font(.system(size: 32).weight(.semibold))
                             .foregroundStyle(Color(accentColor))
                             .frame(width: 48, alignment: .center)
+                            .accessibilityHidden(true)
                         
                         VStack(alignment: .leading, spacing: 2) {
                             Text(row.title)
@@ -36,6 +37,7 @@ struct BulletListNoteItemView: View {
                                 .foregroundStyle(.secondary)
                         }
                     }
+                    .accessibilityElement(children: .combine)
                 }
             }
         }

@@ -59,8 +59,11 @@ struct NoteletSheetContentView: View {
                                 Capsule()
                                     .fill(index == currentPage ? selectedIndicatorColor.opacity(0.35) : Color.secondary.opacity(0.35))
                                     .frame(width: index == currentPage ? 14 : 7, height: 7)
+                                    .accessibilityLabel(index == currentPage ? "Page \(index + 1) of \(versionNotes.count), current" : "Page \(index + 1) of \(versionNotes.count)")
                             }
                         }
+                        .accessibilityElement(children: .combine)
+                        .accessibilityLabel("Page \(currentPage + 1) of \(versionNotes.count)")
                         .padding(.top, 14)
                         .animation(.easeInOut(duration: 0.2), value: currentPage)
                     }
