@@ -24,16 +24,6 @@ struct NoteletSheetContentView: View {
         UIDevice.current.userInterfaceIdiom == .pad
     }
 
-    private var sheetBackgroundStyle: AnyShapeStyle {
-        if #available(iOS 26, *) {
-            let color: Color = colorScheme == .dark ? .black : .white
-            
-            return AnyShapeStyle(color.opacity(0.55))
-        }
-
-        return AnyShapeStyle(.regularMaterial)
-    }
-    
     var body: some View {
         let isOnLastPage = isOnLastPage(versionNotes: versionNotes, currentPage: currentPage)
         
@@ -97,17 +87,12 @@ struct NoteletSheetContentView: View {
                         }
                         .buttonStyle(.borderedProminent)
                         .padding(.horizontal, 28)
-                        .tint(configuration.accentColor)
+                        .tint(Color(configuration.accentColor))
                     }
                 }
                 .safeAreaPadding(.bottom, isIPad ? 24 : 0)
             }
         )
-        .presentationDetents([
-            isIPad ? .large : .fraction(0.85)
-        ])
-        .presentationDragIndicator(.visible)
-        .presentationBackground(sheetBackgroundStyle)
     }
     
     private func onDoneTap() {

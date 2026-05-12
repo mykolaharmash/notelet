@@ -8,80 +8,70 @@
 import SwiftUI
 
 struct NoteletSheet: ViewModifier {
+
+    @Environment(\.colorScheme)
+    private var colorScheme
+
     @State private var isPresented = false
+    @State private var isCurrentVersionMode = false
 
     let notes: [NoteletVersionNotes]
     let version: NoteletPresentedVersion?
     let onDismiss: () -> Void
     let configuration: NoteletConfiguration
-
-    private var versionToShow: String? {
-        switch version {
-        case .current:
-            Helpers.getCurrentAppVersion()
-        case .v(let providedVersion):
-            providedVersion
-        case nil:
-            nil
-        }
-    }
+    let sheetFractionHeight: CGFloat
 
     private var versionNotes: [NoteletVersionNoteItem] {
-        guard let versionToShow else {
-            return []
-        }
-
-        return Helpers.getVersionNotes(for: versionToShow, in: notes)
+        NoteletPresenter.resolve(notes: notes, version: version)?.versionNotes ?? []
     }
 
-    private var isCurrentVersionMode: Bool {
-        if case .current = version {
-            return true
-        }
-
-        return false
-    }
-
-    private var isCurrentVersionAlreadySeen: Bool {
-        UserDefaults.standard.string(
-            forKey: NOTELET_APP_STORAGE_LATEST_SEEN_APP_VERSION_KEY
-        ) == Helpers.getCurrentAppVersion()
-    }
-
-    private var shouldPresent: Bool {
-        guard version != nil else {
-            return false
-        }
-
-        guard !versionNotes.isEmpty else {
-            return false
-        }
-
-        if isCurrentVersionMode {
-            return !isCurrentVersionAlreadySeen
-        }
-
-        return true
-    }
-
-    
     func body(content: Content) -> some View {
         content
             .onAppear {
-                isPresented = shouldPresent
+                updatePresentation()
             }
             .onChange(of: version) {
-                isPresented = shouldPresent
+                updatePresentation()
             }
             .sheet(isPresented: $isPresented, onDismiss: handleDismiss) {
                 NoteletSheetContentView(
                     versionNotes: versionNotes,
                     configuration: configuration
                 )
+                .presentationDetents([
+                    isIPad ? .large : .fraction(sheetFractionHeight)
+                ])
+                .presentationDragIndicator(.visible)
+                .presentationBackground(sheetBackgroundStyle)
             }
     }
-    
-    private func handleDismiss() {
+}
+
+private extension NoteletSheet {
+
+    var isIPad: Bool {
+        UIDevice.current.userInterfaceIdiom == .pad
+    }
+
+    var sheetBackgroundStyle: AnyShapeStyle {
+        if #available(iOS 26, *) {
+            let color: Color = colorScheme == .dark ? .black : .white
+            return AnyShapeStyle(color.opacity(0.55))
+        }
+
+        return AnyShapeStyle(.regularMaterial)
+    }
+
+    func updatePresentation() {
+        if let resolved = NoteletPresenter.resolve(notes: notes, version: version) {
+            isCurrentVersionMode = resolved.isCurrentVersionMode
+            isPresented = true
+        } else {
+            isPresented = false
+        }
+    }
+
+    func handleDismiss() {
         if isCurrentVersionMode {
             NoteletStorage.markCurrentVersionAsSeen()
         }
@@ -95,14 +85,16 @@ extension View {
         notes: [NoteletVersionNotes],
         version: NoteletPresentedVersion? = nil,
         onDismiss: @escaping () -> Void = { },
-        configuration: NoteletConfiguration = .init()
+        configuration: NoteletConfiguration = .init(),
+        sheetFractionHeight: CGFloat = 0.85
     ) -> some View {
         modifier(
             NoteletSheet(
                 notes: notes,
                 version: version,
                 onDismiss: onDismiss,
-                configuration: configuration
+                configuration: configuration,
+                sheetFractionHeight: sheetFractionHeight
             )
         )
     }
