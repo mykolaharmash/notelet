@@ -8,7 +8,9 @@
 import SwiftUI
 
 struct NoteletSheet: ViewModifier {
+
     @State private var isPresented = false
+    @State private var activePresentation: NoteletPresenter.Presentation?
 
     let notes: [NoteletVersionNotes]
     let version: NoteletPresentedVersion?
@@ -16,63 +18,17 @@ struct NoteletSheet: ViewModifier {
     let configuration: NoteletConfiguration
     let userDefaults: UserDefaults
 
-    private var versionToShow: String? {
-        switch version {
-        case .current:
-            Helpers.getCurrentAppVersion()
-        case .v(let providedVersion):
-            providedVersion
-        case nil:
-            nil
-        }
-    }
-
     private var versionNotes: [NoteletVersionNoteItem] {
-        guard let versionToShow else {
-            return []
-        }
-
-        return Helpers.getVersionNotes(for: versionToShow, in: notes)
+        activePresentation?.versionNotes ?? []
     }
 
-    private var isCurrentVersionMode: Bool {
-        if case .current = version {
-            return true
-        }
-
-        return false
-    }
-
-    private var isCurrentVersionAlreadySeen: Bool {
-        userDefaults.string(
-            forKey: NoteletStorageKey.latestSeenAppVersion
-        ) == Helpers.getCurrentAppVersion()
-    }
-
-    private var shouldPresent: Bool {
-        guard version != nil else {
-            return false
-        }
-
-        guard !versionNotes.isEmpty else {
-            return false
-        }
-
-        if isCurrentVersionMode {
-            return !isCurrentVersionAlreadySeen
-        }
-
-        return true
-    }
-
-    
     func body(content: Content) -> some View {
         content
             .onAppear {
-                isPresented = shouldPresent
+                updatePresentation()
             }
             .onChange(of: version) {
-                isPresented = shouldPresent
+                updatePresentation()
             }
             .sheet(isPresented: $isPresented, onDismiss: handleDismiss) {
                 NoteletSheetContentView(
@@ -81,9 +37,21 @@ struct NoteletSheet: ViewModifier {
                 )
             }
     }
-    
-    private func handleDismiss() {
-        if isCurrentVersionMode {
+}
+
+private extension NoteletSheet {
+
+    func updatePresentation() {
+        activePresentation = NoteletPresenter.presentation(
+            notes: notes,
+            version: version,
+            userDefaults: userDefaults
+        )
+        isPresented = activePresentation != nil
+    }
+
+    func handleDismiss() {
+        if activePresentation?.isCurrentVersionMode == true {
             NoteletStorage.markCurrentVersionAsSeen(userDefaults: userDefaults)
         }
 
