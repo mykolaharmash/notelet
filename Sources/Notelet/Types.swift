@@ -16,6 +16,8 @@ public enum NoteletVersionNoteItem: Sendable, Codable {
     public enum MediaKind: Sendable, Codable {
         case image
         case video
+        /// An embeddable web player URL, such as a YouTube or Vimeo embed URL.
+        case embed
     }
     
     public struct ListRow: Sendable, Codable {
