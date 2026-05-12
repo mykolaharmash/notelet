@@ -56,6 +56,7 @@ struct NoteItemView: View {
                     .clipShape(.rect(cornerRadius: clipShapeRadius))
                     .shadow(color: .black.opacity(0.15), radius: 20, x: 0, y: 0)
                     .padding(mediaPadding)
+                    .accessibilityLabel(Text(title))
                     
                     MediaNoteItemDetailsView(
                         title: title,
