@@ -47,6 +47,11 @@ struct NoteItemView: View {
                                 videoURL: url,
                                 isPlaying: isCurrent
                             )
+                        case .embed:
+                            MediaNoteItemEmbedView(
+                                embedURL: url,
+                                isActive: isCurrent
+                            )
                         }
                     }
                     .frame(
