@@ -180,11 +180,12 @@ let RELEASE_NOTES: [NoteletVersionNotes] = [
 
 ## Note types
 
-The `items` property for each app version is an array of `NoteletVersionNoteItem` enum cases. There are three supported note types:
+The `items` property for each app version is an array of `NoteletVersionNoteItem` enum cases. There are four supported note types:
 
 * `.list`
 * `.media(kind: .image)`
 * `.media(kind: .video)`
+* `.media(kind: .embed)`
 
 ### List
 
@@ -259,6 +260,40 @@ let RELEASE_NOTES: [NoteletVersionNotes] = [
 ]
 ```
 
+### Embed
+
+Loads a web-based media player, such as a YouTube or Vimeo embed, along with a title and description.
+
+Embeds are disabled by default because they run third-party web content. To use them, explicitly allow the embed hosts you trust in `NoteletConfiguration`.
+
+```swift
+.noteletSheet(
+    notes: notes,
+    version: .current,
+    configuration: .init(
+        allowedEmbedHosts: NoteletConfiguration.commonEmbedHosts
+    )
+)
+```
+
+```swift
+let RELEASE_NOTES: [NoteletVersionNotes] = [
+    .init(
+        version: "1.2.0",
+        items: [
+            .media(
+                kind: .embed,
+                url: URL(string: "https://www.youtube-nocookie.com/embed/abc123")!,
+                title: "Feature walkthrough",
+                description: "Watch a quick walkthrough of the new flow."
+            )
+        ]
+    )
+]
+```
+
+`NoteletConfiguration.commonEmbedHosts` allows `www.youtube-nocookie.com` and `player.vimeo.com`. You can pass your own host list if your app uses another trusted embed provider.
+
 ## Sheet dismiss callback
 
 `.noteletSheet()` has an optional `onDismiss` parameter similar to the standard `.sheet()`.
@@ -282,7 +317,7 @@ let RELEASE_NOTES: [NoteletVersionNotes] = [
 
 ## Additional configuration
 
-`.noteletSheet()` accepts an optional `NoteletConfiguration` struct where you can customize button labels and accent color.
+`.noteletSheet()` accepts an optional `NoteletConfiguration` struct where you can customize button labels, accent color, and allowed embed hosts.
 
 ```swift
 .noteletSheet(
@@ -291,7 +326,8 @@ let RELEASE_NOTES: [NoteletVersionNotes] = [
     configuration: .init(
         nextButtonLabel: "Continue",
         doneButtonLabel: "Got it",
-        accentColor: .orange
+        accentColor: .orange,
+        allowedEmbedHosts: NoteletConfiguration.commonEmbedHosts
     )
 )
 ```
