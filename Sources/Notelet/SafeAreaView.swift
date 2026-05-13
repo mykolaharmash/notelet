@@ -7,19 +7,19 @@
 
 import SwiftUI
 
-struct SafeAreaView<SafeAreContent: View>: ViewModifier {
-    @ViewBuilder var safeAreContent: () -> SafeAreContent
+struct SafeAreaView<SafeAreaContent: View>: ViewModifier {
+    @ViewBuilder var safeAreaContent: () -> SafeAreaContent
     
     func body(content: Content) -> some View {
         if #available(iOS 26, *) {
             content
                 .safeAreaBar(edge: .bottom) {
-                    safeAreContent()
+                    safeAreaContent()
                 }
         } else {
             content
                 .safeAreaInset(edge: .bottom, spacing: 0) {
-                    safeAreContent()
+                    safeAreaContent()
                         .frame(maxWidth: .infinity)
                         .background {
                             Rectangle()
