@@ -12,12 +12,13 @@ import UIKit
 struct MediaNoteItemVideoView: View {
     let videoURL: URL
     let isPlaying: Bool
-    
+    let onLoadStateChange: (MediaNoteItemLoadState) -> Void
+
     @State private var player: AVQueuePlayer?
     @State private var playerLooper: AVPlayerLooper?
     @State private var videoStatusObserver: NSKeyValueObservation?
     @State private var isVideoLoading: Bool = true
-    
+
     var body: some View {
         ZStack {
             AspectFillVideoPlayer(player: player)
@@ -45,6 +46,7 @@ struct MediaNoteItemVideoView: View {
         videoStatusObserver = nil
 
         isVideoLoading = true
+        onLoadStateChange(.loading)
 
         let asset = AVURLAsset(url: videoURL)
         let playerItem = AVPlayerItem(asset: asset)
@@ -57,8 +59,12 @@ struct MediaNoteItemVideoView: View {
         videoStatusObserver = queuePlayer.observe(\.currentItem?.status, options: [.initial, .new]) { observedPlayer, _ in
             Task { @MainActor in
                 switch observedPlayer.currentItem?.status {
-                case .readyToPlay, .failed:
+                case .readyToPlay:
                     isVideoLoading = false
+                    onLoadStateChange(.loaded)
+                case .failed:
+                    isVideoLoading = false
+                    onLoadStateChange(.failed)
                 default:
                     break
                 }
@@ -88,7 +94,7 @@ fileprivate struct AspectFillVideoPlayer: UIViewRepresentable {
             layer as! AVPlayerLayer
         }
     }
-    
+
     let player: AVPlayer?
 
     func makeUIView(context: Context) -> PlayerView {

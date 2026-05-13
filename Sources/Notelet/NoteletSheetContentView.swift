@@ -10,7 +10,7 @@ import SwiftUI
 struct NoteletSheetContentView: View {
     let versionNotes: [NoteletVersionNoteItem]
     let configuration: NoteletConfiguration
-    
+
     @State private var selectedPageID: Int? = 0
 
     @Environment(\.dismiss) private var dismiss
@@ -19,7 +19,7 @@ struct NoteletSheetContentView: View {
     private var currentPage: Int {
         return selectedPageID ?? 0
     }
-    
+
     private var isIPad: Bool {
         UIDevice.current.userInterfaceIdiom == .pad
     }
@@ -27,16 +27,16 @@ struct NoteletSheetContentView: View {
     private var sheetBackgroundStyle: AnyShapeStyle {
         if #available(iOS 26, *) {
             let color: Color = colorScheme == .dark ? .black : .white
-            
+
             return AnyShapeStyle(color.opacity(0.55))
         }
 
         return AnyShapeStyle(.regularMaterial)
     }
-    
+
     var body: some View {
         let isOnLastPage = isOnLastPage(versionNotes: versionNotes, currentPage: currentPage)
-        
+
         NavigationStack {
             ScrollView(.horizontal) {
                 HStack(alignment: .top, spacing: 0) {
@@ -63,21 +63,21 @@ struct NoteletSheetContentView: View {
                 VStack(spacing: 16) {
                     if versionNotes.count > 1 {
                         let selectedIndicatorColor = colorScheme == .light ? Color.black : Color.white
-                        
+                        let pageIndicatorAccessibilityLabel: LocalizedStringResource = "Page \(currentPage + 1) of \(versionNotes.count)"
+
                         HStack(spacing: 6) {
                             ForEach(versionNotes.indices, id: \.self) { index in
                                 Capsule()
                                     .fill(index == currentPage ? selectedIndicatorColor.opacity(0.35) : Color.secondary.opacity(0.35))
                                     .frame(width: index == currentPage ? 14 : 7, height: 7)
-                                    .accessibilityLabel(index == currentPage ? "Page \(index + 1) of \(versionNotes.count), current" : "Page \(index + 1) of \(versionNotes.count)")
                             }
                         }
-                        .accessibilityElement(children: .combine)
-                        .accessibilityLabel("Page \(currentPage + 1) of \(versionNotes.count)")
+                        .accessibilityElement(children: .ignore)
+                        .accessibilityLabel(Text(pageIndicatorAccessibilityLabel))
                         .padding(.top, 14)
                         .animation(.easeInOut(duration: 0.2), value: currentPage)
                     }
-                    
+
                     if !versionNotes.isEmpty {
                         Button {
                             if isOnLastPage {
@@ -91,7 +91,7 @@ struct NoteletSheetContentView: View {
                             let buttonTitle: LocalizedStringResource = isOnLastPage
                             ? configuration.doneButtonLabel
                             : configuration.nextButtonLabel
-                            
+
                             Text(buttonTitle)
                                 .fontWeight(.bold)
                                 .foregroundStyle(.primary)
@@ -112,11 +112,11 @@ struct NoteletSheetContentView: View {
         .presentationDragIndicator(.visible)
         .presentationBackground(sheetBackgroundStyle)
     }
-    
+
     private func onDoneTap() {
         dismiss()
     }
-    
+
     private func isOnLastPage(versionNotes: [NoteletVersionNoteItem], currentPage: Int) -> Bool {
         guard !versionNotes.isEmpty else {
             return true

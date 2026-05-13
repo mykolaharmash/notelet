@@ -11,9 +11,10 @@ struct NoteItemView: View {
     let item: NoteletVersionNoteItem
     let isCurrent: Bool
     let configuration: NoteletConfiguration
-    
+
     @State private var containerSize: CGSize = .zero
-    
+    @State private var mediaLoadState: MediaNoteItemLoadState = .loading
+
     private var clipShapeRadius: Double {
         if #available(iOS 26, *) {
             24
@@ -21,7 +22,7 @@ struct NoteItemView: View {
             12
         }
     }
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             switch item {
@@ -35,17 +36,19 @@ struct NoteItemView: View {
                      * iPads and iPhones in landscape orientation.
                      */
                     let containerWidth = min(max(containerSize.width, 300), 440)
-                    
+
                     ZStack {
                         switch mediaKind {
                         case .image:
                             MediaNoteItemImageView(
-                                imageUrl: url
+                                imageUrl: url,
+                                onLoadStateChange: { mediaLoadState = $0 }
                             )
                         case .video:
                             MediaNoteItemVideoView(
                                 videoURL: url,
-                                isPlaying: isCurrent
+                                isPlaying: isCurrent,
+                                onLoadStateChange: { mediaLoadState = $0 }
                             )
                         }
                     }
@@ -56,15 +59,23 @@ struct NoteItemView: View {
                     .clipShape(.rect(cornerRadius: clipShapeRadius))
                     .shadow(color: .black.opacity(0.15), radius: 20, x: 0, y: 0)
                     .padding(mediaPadding)
-                    .accessibilityLabel(Text(title))
-                    
+
                     MediaNoteItemDetailsView(
                         title: title,
                         description: description
                     )
-                    
+
                     Spacer()
                 }
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(
+                    mediaAccessibilityLabel(
+                        kind: mediaKind,
+                        loadState: mediaLoadState,
+                        title: title,
+                        description: description
+                    )
+                )
             case .list(let title, let rows):
                 BulletListNoteItemView(
                     title: title,
@@ -78,6 +89,28 @@ struct NoteItemView: View {
             proxy.size
         } action: { newSize in
             containerSize = newSize
+        }
+    }
+
+    private func mediaAccessibilityLabel(
+        kind: NoteletVersionNoteItem.MediaKind,
+        loadState: MediaNoteItemLoadState,
+        title: LocalizedStringResource,
+        description: LocalizedStringResource
+    ) -> Text {
+        switch (kind, loadState) {
+        case (.image, .loading):
+            Text("Loading image. \(title). \(description)")
+        case (.image, .loaded):
+            Text("Image. \(title). \(description)")
+        case (.image, .failed):
+            Text("Image failed to load. \(title). \(description)")
+        case (.video, .loading):
+            Text("Loading video. \(title). \(description)")
+        case (.video, .loaded):
+            Text("Video. \(title). \(description)")
+        case (.video, .failed):
+            Text("Video failed to load. \(title). \(description)")
         }
     }
 }
