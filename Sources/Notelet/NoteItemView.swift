@@ -51,10 +51,19 @@ struct NoteItemView: View {
                 onLoadStateChange: { mediaLoadState = $0 }
               )
             case .embed:
-              MediaNoteItemEmbedView(
+              if let embedView = MediaNoteItemEmbedView(
                 embedURL: url,
-                isActive: isCurrent
-              )
+                isActive: isCurrent,
+                allowedHosts: configuration.allowedEmbedHosts
+              ) {
+                embedView
+              } else {
+                Image(systemName: "safari")
+                  .resizable()
+                  .scaledToFit()
+                  .padding(40)
+                  .foregroundStyle(.secondary)
+              }
             }
           }
           .frame(
@@ -116,6 +125,8 @@ struct NoteItemView: View {
       Text("Video. \(title). \(description)")
     case (.video, .failed):
       Text("Video failed to load. \(title). \(description)")
+    case (.embed, _):
+      Text("Web embed. \(title). \(description)")
     }
   }
 }
