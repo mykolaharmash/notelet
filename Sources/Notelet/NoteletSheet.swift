@@ -14,6 +14,7 @@ struct NoteletSheet: ViewModifier {
     let version: NoteletPresentedVersion?
     let onDismiss: () -> Void
     let configuration: NoteletConfiguration
+    let userDefaults: UserDefaults
 
     private var versionToShow: String? {
         switch version {
@@ -43,8 +44,8 @@ struct NoteletSheet: ViewModifier {
     }
 
     private var isCurrentVersionAlreadySeen: Bool {
-        UserDefaults.standard.string(
-            forKey: NOTELET_APP_STORAGE_LATEST_SEEN_APP_VERSION_KEY
+        userDefaults.string(
+            forKey: NoteletStorageKey.latestSeenAppVersion
         ) == Helpers.getCurrentAppVersion()
     }
 
@@ -83,26 +84,35 @@ struct NoteletSheet: ViewModifier {
     
     private func handleDismiss() {
         if isCurrentVersionMode {
-            NoteletStorage.markCurrentVersionAsSeen()
+            NoteletStorage.markCurrentVersionAsSeen(userDefaults: userDefaults)
         }
-        
+
         onDismiss()
     }
 }
 
 extension View {
+    /// Attach a release-notes sheet to the modified view.
+    ///
+    /// - Parameter userDefaults: Storage backing the "seen version" check used
+    ///   in `.current` presentation mode. Defaults to `.standard`. Pass an App
+    ///   Group `UserDefaults` (e.g. `UserDefaults(suiteName: "group.com.example.myapp")`)
+    ///   when the host app needs to share "seen" state with an extension
+    ///   target like a widget, intent, or share extension.
     public func noteletSheet(
         notes: [NoteletVersionNotes],
         version: NoteletPresentedVersion? = nil,
         onDismiss: @escaping () -> Void = { },
-        configuration: NoteletConfiguration = .init()
+        configuration: NoteletConfiguration = .init(),
+        userDefaults: UserDefaults = .standard
     ) -> some View {
         modifier(
             NoteletSheet(
                 notes: notes,
                 version: version,
                 onDismiss: onDismiss,
-                configuration: configuration
+                configuration: configuration,
+                userDefaults: userDefaults
             )
         )
     }
