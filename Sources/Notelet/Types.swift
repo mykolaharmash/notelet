@@ -57,8 +57,9 @@ public struct NoteletConfiguration: Sendable {
     ///   - nextButtonLabel: Localized accessibility label for the arrow button.
     ///   - doneButtonLabel: Localized accessibility label for the checkmark button.
     ///   - accentColor: Tint for the action button and list symbols.
-    ///   - presentationDetents: A nonempty set that replaces the default detents.
-    ///     Pass `nil` to use `[.fraction(0.85), .large]`.
+    ///   - presentationDetents: A nonempty set that replaces the default detents
+    ///     on iOS and iPadOS. Pass `nil` to use `[.fraction(0.85), .large]`.
+    ///     macOS uses native sheet sizing instead.
     public init(
         nextButtonLabel: LocalizedStringResource = "Next",
         doneButtonLabel: LocalizedStringResource = "Done",

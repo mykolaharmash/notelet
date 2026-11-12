@@ -7,7 +7,11 @@
 
 import SwiftUI
 import AVKit
+#if os(macOS)
+import AppKit
+#else
 import UIKit
+#endif
 
 struct MediaNoteItemVideoView: View {
     let videoURL: URL
@@ -86,6 +90,22 @@ struct MediaNoteItemVideoView: View {
     }
 }
 
+#if os(macOS)
+fileprivate struct AspectFillVideoPlayer: NSViewRepresentable {
+    let player: AVPlayer?
+
+    func makeNSView(context: Context) -> AVPlayerView {
+        let view = AVPlayerView()
+        view.controlsStyle = .none
+        view.videoGravity = .resizeAspectFill
+        return view
+    }
+
+    func updateNSView(_ nsView: AVPlayerView, context: Context) {
+        nsView.player = player
+    }
+}
+#else
 fileprivate struct AspectFillVideoPlayer: UIViewRepresentable {
     final class PlayerView: UIView {
         override static var layerClass: AnyClass { AVPlayerLayer.self }
@@ -108,3 +128,4 @@ fileprivate struct AspectFillVideoPlayer: UIViewRepresentable {
         uiView.playerLayer.player = player
     }
 }
+#endif

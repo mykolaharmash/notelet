@@ -16,7 +16,7 @@ struct NoteItemView: View {
     @State private var mediaLoadState: MediaNoteItemLoadState = .loading
 
     private var clipShapeRadius: Double {
-        if #available(iOS 26, *) {
+        if #available(iOS 26, macOS 26, *) {
             24
         } else {
             12

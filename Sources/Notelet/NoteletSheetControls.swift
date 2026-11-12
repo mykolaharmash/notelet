@@ -8,6 +8,19 @@ struct NoteletSheetContainer<Content: View, ActionButton: View>: View {
     @ViewBuilder var content: () -> Content
 
     var body: some View {
+        #if os(macOS)
+        content()
+            .modifier(
+                SafeAreaView {
+                    NoteletSheetFooter(
+                        pageCount: pageCount,
+                        currentPage: currentPage,
+                        showsAction: true,
+                        actionButton: actionButton
+                    )
+                }
+            )
+        #else
         if #available(iOS 27.1, *) {
             VerticalNoteletSheetContainer(
                 pageCount: pageCount,
@@ -31,9 +44,11 @@ struct NoteletSheetContainer<Content: View, ActionButton: View>: View {
             )
             .ignoresSafeArea(.container, edges: .bottom)
         }
+        #endif
     }
 }
 
+#if os(iOS)
 @available(iOS 27.1, *)
 private struct VerticalNoteletSheetContainer<Content: View, ActionButton: View>: View {
     @Environment(\.toolbarVerticalEdge) private var toolbarVerticalEdge
@@ -68,6 +83,7 @@ private struct VerticalNoteletSheetContainer<Content: View, ActionButton: View>:
         .ignoresSafeArea(.container, edges: .bottom)
     }
 }
+#endif
 
 private struct NoteletSheetFooter<ActionButton: View>: View {
     let pageCount: Int
@@ -148,5 +164,8 @@ struct NoteletCircularActionButton: View {
         .buttonBorderShape(.circle)
         .controlSize(.large)
         .tint(accentColor)
+        #if os(macOS)
+        .keyboardShortcut(.defaultAction)
+        #endif
     }
 }

@@ -4,12 +4,13 @@
 
 <h3 align="center">Notelet</h3>
 
-<p align="center">SwiftUI package for showing rich release notes in iOS apps</p>
+<p align="center">SwiftUI package for showing rich release notes in iOS and macOS apps</p>
 
 <p align="center">
     <img src="https://img.shields.io/badge/iOS-17.0+-2980b9.svg" />
     <img src="https://img.shields.io/badge/iPadOS-17.0+-8e44ad.svg" />
     <img src="https://img.shields.io/badge/iPhone Duo-07A62F.svg" />
+    <img src="https://img.shields.io/badge/macOS-14.0+-555555.svg" />
 </p>
 
 https://github.com/user-attachments/assets/bce35ecf-aa85-49fa-b736-67994230d147
@@ -306,7 +307,9 @@ The separate `userDefaults` parameter on `.noteletSheet()` defaults to `.standar
 
 The action button shows a symbol; its labels provide accessible, localized descriptions.
 
-When `NoteletConfiguration.presentationDetents` is `nil` or omitted, Notelet uses `[.fraction(0.85), .large]` on all devices. Pass a nonempty set to replace these defaults, for example `[.large]` for only the large detent or `[.medium, .large]` to offer two sizes. SwiftUI determines how each detent is presented in the current window and size class.
+When `NoteletConfiguration.presentationDetents` is `nil` or omitted, Notelet uses `[.fraction(0.85), .large]` on iOS and iPadOS. Pass a nonempty set to replace these defaults, for example `[.large]` for only the large detent or `[.medium, .large]` to offer two sizes. SwiftUI determines how each detent is presented in the current window and size class.
+
+On macOS, Notelet uses a native sheet with an ideal size of 480 × 640 points and a minimum size of 360 × 400 points. On macOS 15 and later, the sheet supports resizing with SwiftUI's [fitted presentation sizing](https://developer.apple.com/documentation/swiftui/presentationsizing/fitted). `presentationDetents` applies to iOS and iPadOS; macOS uses the native sheet sizing instead. Return advances to the next page or finishes the notes, and Escape dismisses the sheet.
 
 ## Latest viewed version storage
 

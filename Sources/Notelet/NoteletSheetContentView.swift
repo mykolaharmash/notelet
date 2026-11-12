@@ -25,7 +25,7 @@ struct NoteletSheetContentView: View {
     }
 
     private var sheetBackgroundStyle: AnyShapeStyle {
-        if #available(iOS 26, *) {
+        if #available(iOS 26, macOS 26, *) {
             let color: Color = colorScheme == .dark ? .black : .white
 
             return AnyShapeStyle(color.opacity(0.55))
@@ -85,8 +85,17 @@ struct NoteletSheetContentView: View {
                 }
             }
         }
+        #if os(macOS)
+        .modifier(MacOSNoteletSheetSizing())
+        .frame(
+            minWidth: 360, idealWidth: 480, maxWidth: .infinity,
+            minHeight: 400, idealHeight: 640, maxHeight: .infinity
+        )
+        .onExitCommand { dismiss() }
+        #else
         .presentationDetents(presentationDetents ?? [.fraction(0.85), .large])
         .presentationDragIndicator(.visible)
+        #endif
         .presentationBackground(sheetBackgroundStyle)
     }
 
@@ -109,9 +118,21 @@ struct NoteletSheetContentView: View {
     }
 }
 
+#if os(macOS)
+private struct MacOSNoteletSheetSizing: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(macOS 15, *) {
+            content.presentationSizing(.fitted)
+        } else {
+            content
+        }
+    }
+}
+#endif
+
 fileprivate struct SoftScrollEdgeEffect: ViewModifier {
     func body(content: Content) -> some View {
-        if #available(iOS 26, *) {
+        if #available(iOS 26, macOS 26, *) {
             content
                 .scrollEdgeEffectStyle(.soft, for: .all)
         } else {
