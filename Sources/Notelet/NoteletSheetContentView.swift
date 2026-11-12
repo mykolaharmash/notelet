@@ -38,26 +38,42 @@ struct NoteletSheetContentView: View {
         let isOnLastPage = isOnLastPage(versionNotes: versionNotes, currentPage: currentPage)
 
         NavigationStack {
-            ScrollView(.horizontal) {
-                HStack(alignment: .top, spacing: 0) {
-                    ForEach(Array(versionNotes.enumerated()), id: \.offset) { index, item in
-                        ScrollView(.vertical) {
-                            NoteItemView(
-                                item: item,
-                                isCurrent: index == currentPage,
-                                configuration: configuration
-                            )
-                            .id(index)
+            GeometryReader { geometry in
+                ScrollViewReader { scrollProxy in
+                    ScrollView(.horizontal) {
+                        HStack(alignment: .top, spacing: 0) {
+                            ForEach(Array(versionNotes.enumerated()), id: \.offset) { index, item in
+                                ScrollView(.vertical) {
+                                    NoteItemView(
+                                        item: item,
+                                        isCurrent: index == currentPage,
+                                        availableWidth: geometry.size.width,
+                                        configuration: configuration
+                                    )
+                                }
+                                .contentMargins(.bottom, 80)
+                                .frame(width: geometry.size.width)
+                                .opacity(index == currentPage ? 1 : 0)
+                                .animation(.easeInOut(duration: 0.2), value: currentPage)
+                                .id(index)
+                            }
                         }
-                        .contentMargins(.bottom, 80)
+                        .scrollTargetLayout()
+                        .onGeometryChange(for: CGFloat.self) { proxy in
+                            proxy.size.width
+                        } action: { width in
+                            guard width > 0 else { return }
+                            // Realign after the pages, rather than just the viewport, finish resizing.
+                            scrollProxy.scrollTo(currentPage, anchor: .leading)
+                        }
                     }
+                    // Align to the safe-area-sized page rather than the full scroll container.
+                    .scrollTargetBehavior(.viewAligned(limitBehavior: .always))
+                    .scrollIndicators(.hidden)
+                    .scrollPosition(id: $selectedPageID, anchor: .leading)
+                    .modifier(SoftScrollEdgeEffect())
                 }
-                .scrollTargetLayout()
             }
-            .scrollTargetBehavior(.paging)
-            .scrollIndicators(.hidden)
-            .scrollPosition(id: $selectedPageID)
-            .modifier(SoftScrollEdgeEffect())
         }
         .modifier(
             SafeAreaView {
