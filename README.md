@@ -319,18 +319,6 @@ When `NoteletConfiguration.presentationDetents` is `nil` or omitted, Notelet use
 
 When using `version: .current`, Notelet automatically marks the current version as seen by saving it to `UserDefaults`.
 
-To share this state with an extension, pass the same App Group `UserDefaults` to `.noteletSheet()` and the storage helpers:
-
-```swift
-let sharedDefaults = UserDefaults(suiteName: "group.com.example.myapp")!
-
-// On your view:
-.noteletSheet(notes: notes, version: .current, userDefaults: sharedDefaults)
-
-// When marking the current version as seen manually:
-NoteletStorage.markCurrentVersionAsSeen(userDefaults: sharedDefaults)
-```
-
 In some cases, you might also want to save it manually. For example, I don't want new users to see the release notes sheet right after onboarding, so when onboarding is done, I manually mark the current version as seen, and they only see release notes on the next update.
 
 ```swift
