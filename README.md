@@ -32,8 +32,6 @@ For a Swift package, add the dependency to `Package.swift`:
 .package(url: "https://github.com/mykolaharmash/notelet", from: "2.0.0")
 ```
 
-Notelet 2.0 replaces `NoteletSheetHeight` with configurable presentation detents. See [Migrating from 1.x](#migrating-from-1x) below.
-
 ## Usage
 
 Here is a full usage example with comments to get started quickly. Below are more detailed explanations of how the component works and all available APIs.
@@ -316,16 +314,6 @@ The separate `userDefaults` parameter on `.noteletSheet()` defaults to `.standar
 The action button shows a symbol; its labels provide accessible, localized descriptions.
 
 When `NoteletConfiguration.presentationDetents` is `nil` or omitted, Notelet uses `[.fraction(0.85), .large]` on all devices. Pass a nonempty set to replace these defaults, for example `[.large]` for only the large detent or `[.medium, .large]` to offer two sizes. SwiftUI determines how each detent is presented in the current window and size class.
-
-## Migrating from 1.x
-
-Notelet 2.0 is a breaking API update:
-
-- Keep using `NoteletConfiguration` for customization. Its button labels and accent color options are unchanged.
-- `NoteletSheetHeight` has been removed. Inside `NoteletConfiguration`, replace `sheetHeight: .full` with `presentationDetents: [.large]`.
-- Omit `presentationDetents` to use the new defaults, `[.fraction(0.85), .large]`. To offer only the former `.standard` height, pass `presentationDetents: [.fraction(0.85)]`. Detent overrides now apply to iPad as well as iPhone.
-
-Calls that use the default configuration or customize only button labels and accent color keep the same API. The `notes`, `version`, `onDismiss`, and `userDefaults` parameters are unchanged.
 
 ## Latest viewed version storage
 
