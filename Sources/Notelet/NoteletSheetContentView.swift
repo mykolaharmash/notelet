@@ -63,14 +63,20 @@ struct NoteletSheetContentView: View {
             SafeAreaView {
                 VStack(spacing: 16) {
                     if versionNotes.count > 1 {
-                        let selectedIndicatorColor = colorScheme == .light ? Color.black : Color.white
                         let pageIndicatorAccessibilityLabel: LocalizedStringResource = "Page \(currentPage + 1) of \(versionNotes.count)"
 
                         HStack(spacing: 6) {
                             ForEach(versionNotes.indices, id: \.self) { index in
-                                Capsule()
-                                    .fill(index == currentPage ? selectedIndicatorColor.opacity(0.35) : Color.secondary.opacity(0.35))
-                                    .frame(width: index == currentPage ? 14 : 7, height: 7)
+                                /**
+                                 * Use symbols instead of Circle views because
+                                 * iOS 27 did not consider Circle for the scroll edge
+                                 * effect didn't extent the blur to the full safe area
+                                 * height
+                                 */
+                                Image(systemName: "circle.fill")
+                                    .font(.system(size: 7))
+                                    .foregroundStyle(Color.primary.opacity(index == currentPage ? 0.65 : 0.2))
+                                    .frame(width: 7, height: 7)
                             }
                         }
                         .accessibilityElement(children: .ignore)
