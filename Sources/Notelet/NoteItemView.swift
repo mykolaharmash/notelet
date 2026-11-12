@@ -59,6 +59,7 @@ struct NoteItemView: View {
                         title: title,
                         description: description
                     )
+                    .frame(maxWidth: mediaSize, alignment: .leading)
 
                     Spacer()
                 }
