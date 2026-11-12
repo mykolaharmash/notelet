@@ -9,6 +9,7 @@
 <p align="center">
     <img src="https://img.shields.io/badge/iOS-17.0+-2980b9.svg" />
     <img src="https://img.shields.io/badge/iPadOS-17.0+-8e44ad.svg" />
+    <img src="https://img.shields.io/badge/iPhone Duo-07A62F.svg" />
 </p>
 
 <p align="center">
