@@ -161,7 +161,7 @@ You may also want to show release notes for app versions other than the current 
 
 The list of release notes for each app version is an array of `NoteletVersionNotes` structs. Each struct specifies the `version` and `items`.
 
-You can have as many notes inside `items` for each version as needed. They are arranged in a paging view with progress dots and a circular arrow button, which becomes a checkmark on the last page. Users can also swipe between pages. Where a vertical toolbar is available, the action button appears at its bottom.
+You can have as many notes inside `items` for each version as needed. They are arranged in a paging view with progress indicator and a button to move forward. Users can also swipe between pages.
 
 The array can be a global constant or a static property on some top level view. I personally keep it in a global constant.
 
