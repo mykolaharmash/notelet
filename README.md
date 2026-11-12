@@ -12,7 +12,7 @@
 </p>
 
 <p align="center">
-  <video src="https://github.com/user-attachments/assets/dd636105-82bb-4fd2-8d5a-ada9e9e4c38c" controls muted playsinline height="600px" width="auto"></video>
+  <video src="https://github.com/user-attachments/assets/bce35ecf-aa85-49fa-b736-67994230d147" controls muted playsinline height="600px" width="auto"></video>
 </p>
 
 > [!TIP]
