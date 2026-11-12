@@ -44,30 +44,3 @@ public enum NoteletPresentedVersion: Sendable, Hashable {
     case current
     case v(String)
 }
-
-/// How tall the sheet is on iPhone. iPad always uses the large detent.
-public enum NoteletSheetHeight: Sendable {
-    /// 85% of the screen, leaving a sliver of the presenting view visible.
-    case standard
-    /// The full large detent.
-    case full
-}
-
-public struct NoteletConfiguration: Sendable {
-    let nextButtonLabel: LocalizedStringResource
-    let doneButtonLabel: LocalizedStringResource
-    let accentColor: Color
-    let sheetHeight: NoteletSheetHeight
-    
-    public init(
-        nextButtonLabel: LocalizedStringResource = "Next",
-        doneButtonLabel: LocalizedStringResource = "Done",
-        accentColor: Color = .blue,
-        sheetHeight: NoteletSheetHeight = .standard
-    ) {
-        self.nextButtonLabel = nextButtonLabel
-        self.doneButtonLabel = doneButtonLabel
-        self.accentColor = accentColor
-        self.sheetHeight = sheetHeight
-    }
-}

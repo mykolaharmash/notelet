@@ -11,7 +11,7 @@ struct NoteItemView: View {
     let item: NoteletVersionNoteItem
     let isCurrent: Bool
     let availableWidth: CGFloat
-    let configuration: NoteletConfiguration
+    let accentColor: Color
 
     @State private var mediaLoadState: MediaNoteItemLoadState = .loading
 
@@ -75,7 +75,7 @@ struct NoteItemView: View {
                 BulletListNoteItemView(
                     title: title,
                     rows: rows,
-                    accentColor: configuration.accentColor
+                    accentColor: accentColor
                 )
             }
         }

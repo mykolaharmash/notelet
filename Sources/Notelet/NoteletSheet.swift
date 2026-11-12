@@ -13,7 +13,10 @@ struct NoteletSheet: ViewModifier {
     let notes: [NoteletVersionNotes]
     let version: NoteletPresentedVersion?
     let onDismiss: () -> Void
-    let configuration: NoteletConfiguration
+    let nextButtonLabel: LocalizedStringResource
+    let doneButtonLabel: LocalizedStringResource
+    let accentColor: Color
+    let presentationDetents: Set<PresentationDetent>?
     let userDefaults: UserDefaults
 
     private var versionToShow: String? {
@@ -77,7 +80,10 @@ struct NoteletSheet: ViewModifier {
             .sheet(isPresented: $isPresented, onDismiss: handleDismiss) {
                 NoteletSheetContentView(
                     versionNotes: versionNotes,
-                    configuration: configuration
+                    nextButtonLabel: nextButtonLabel,
+                    doneButtonLabel: doneButtonLabel,
+                    accentColor: accentColor,
+                    presentationDetents: presentationDetents
                 )
             }
     }
@@ -94,16 +100,26 @@ struct NoteletSheet: ViewModifier {
 extension View {
     /// Attach a release-notes sheet to the modified view.
     ///
-    /// - Parameter userDefaults: Storage backing the "seen version" check used
-    ///   in `.current` presentation mode. Defaults to `.standard`. Pass an App
-    ///   Group `UserDefaults` (e.g. `UserDefaults(suiteName: "group.com.example.myapp")`)
-    ///   when the host app needs to share "seen" state with an extension
-    ///   target like a widget, intent, or share extension.
+    /// - Parameters:
+    ///   - notes: Release notes grouped by app version.
+    ///   - version: The app version to present. Pass `nil` to keep the sheet hidden.
+    ///   - onDismiss: Called when the sheet is dismissed.
+    ///   - nextButtonLabel: Localized accessibility label for the arrow button.
+    ///   - doneButtonLabel: Localized accessibility label for the checkmark button.
+    ///   - accentColor: Tint for the action button and list symbols.
+    ///   - presentationDetents: A nonempty set that replaces the default detents.
+    ///     Pass `nil` to use `[.fraction(0.85), .large]`.
+    ///   - userDefaults: Storage backing the "seen version" check used in `.current`
+    ///     presentation mode. Defaults to `.standard`. Pass an App Group
+    ///     `UserDefaults` to share "seen" state with an extension.
     public func noteletSheet(
         notes: [NoteletVersionNotes],
         version: NoteletPresentedVersion? = nil,
         onDismiss: @escaping () -> Void = { },
-        configuration: NoteletConfiguration = .init(),
+        nextButtonLabel: LocalizedStringResource = "Next",
+        doneButtonLabel: LocalizedStringResource = "Done",
+        accentColor: Color = .blue,
+        presentationDetents: Set<PresentationDetent>? = nil,
         userDefaults: UserDefaults = .standard
     ) -> some View {
         modifier(
@@ -111,7 +127,10 @@ extension View {
                 notes: notes,
                 version: version,
                 onDismiss: onDismiss,
-                configuration: configuration,
+                nextButtonLabel: nextButtonLabel,
+                doneButtonLabel: doneButtonLabel,
+                accentColor: accentColor,
+                presentationDetents: presentationDetents,
                 userDefaults: userDefaults
             )
         )

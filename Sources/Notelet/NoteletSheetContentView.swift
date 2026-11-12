@@ -9,7 +9,10 @@ import SwiftUI
 
 struct NoteletSheetContentView: View {
     let versionNotes: [NoteletVersionNoteItem]
-    let configuration: NoteletConfiguration
+    let nextButtonLabel: LocalizedStringResource
+    let doneButtonLabel: LocalizedStringResource
+    let accentColor: Color
+    let presentationDetents: Set<PresentationDetent>?
 
     @State private var selectedPageID: Int? = 0
 
@@ -19,10 +22,6 @@ struct NoteletSheetContentView: View {
 
     private var currentPage: Int {
         return selectedPageID ?? 0
-    }
-
-    private var isIPad: Bool {
-        UIDevice.current.userInterfaceIdiom == .pad
     }
 
     private var sheetBackgroundStyle: AnyShapeStyle {
@@ -37,7 +36,7 @@ struct NoteletSheetContentView: View {
 
     var body: some View {
         let isOnLastPage = isOnLastPage(versionNotes: versionNotes, currentPage: currentPage)
-        let buttonTitle = isOnLastPage ? configuration.doneButtonLabel : configuration.nextButtonLabel
+        let buttonTitle = isOnLastPage ? doneButtonLabel : nextButtonLabel
 
         NoteletSheetContainer(
             pageCount: versionNotes.count,
@@ -45,13 +44,11 @@ struct NoteletSheetContentView: View {
             actionButton: NoteletCircularActionButton(
                 title: buttonTitle,
                 systemImage: isOnLastPage ? "checkmark" : "arrow.forward",
-                accentColor: configuration.accentColor,
+                accentColor: accentColor,
                 action: onAdvanceTap
             )
         ) {
             GeometryReader { geometry in
-                let _ = print(geometry.size.width)
-                
                 ScrollViewReader { scrollProxy in
                     ScrollView(.horizontal) {
                         HStack(alignment: .top, spacing: 0) {
@@ -61,7 +58,7 @@ struct NoteletSheetContentView: View {
                                         item: item,
                                         isCurrent: index == currentPage,
                                         availableWidth: geometry.size.width,
-                                        configuration: configuration
+                                        accentColor: accentColor
                                     )
                                 }
                                 .contentMargins(.bottom, 80)
@@ -88,9 +85,7 @@ struct NoteletSheetContentView: View {
                 }
             }
         }
-        .presentationDetents([
-            isIPad || configuration.sheetHeight == .full ? .large : .fraction(0.85)
-        ])
+        .presentationDetents(presentationDetents ?? [.fraction(0.85), .large])
         .presentationDragIndicator(.visible)
         .presentationBackground(sheetBackgroundStyle)
     }

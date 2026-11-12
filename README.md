@@ -23,9 +23,16 @@
 1. In Xcode, open your app project.
 2. Go to **File → Add Package Dependencies...**.
 3. Enter the repo URL https://github.com/mykolaharmash/notelet into the search.
-4. Click on "Add package".
+4. Choose **Up to Next Major Version** starting at **2.0.0**, then click on "Add package".
 5. Add `Notelet` to your app target.
 
+For a Swift package, add the dependency to `Package.swift`:
+
+```swift
+.package(url: "https://github.com/mykolaharmash/notelet", from: "2.0.0")
+```
+
+Notelet 2.0 removes `NoteletConfiguration` and `NoteletSheetHeight`. See [Migrating from 1.x](#migrating-from-1x) below.
 
 ## Usage
 
@@ -162,7 +169,7 @@ You may also want to show release notes for app versions other than the current 
 
 The list of release notes for each app version is an array of `NoteletVersionNotes` structs. Each struct specifies the `version` and `items`.
 
-You can have as many notes inside `items` for each version as needed, they will be arranged in a paging view with navigation either using the "Next" button or by swiping.
+You can have as many notes inside `items` for each version as needed. They are arranged in a paging view with progress dots and a circular arrow button, which becomes a checkmark on the last page. Users can also swipe between pages. Where a vertical toolbar is available, the action button appears at its bottom.
 
 The array can be a global constant or a static property on some top level view. I personally keep it in a global constant.
 
@@ -282,26 +289,56 @@ let RELEASE_NOTES: [NoteletVersionNotes] = [
 
 ## Additional configuration
 
-`.noteletSheet()` accepts an optional `NoteletConfiguration` struct where you can customize button labels, accent color and the sheet height.
+Pass customization options directly to `.noteletSheet()`:
 
 ```swift
 .noteletSheet(
     notes: notes,
     version: .current,
-    configuration: .init(
-        nextButtonLabel: "Continue",
-        doneButtonLabel: "Got it",
-        accentColor: .orange,
-        sheetHeight: .full
-    )
+    nextButtonLabel: "Continue",
+    doneButtonLabel: "Got it",
+    accentColor: .orange,
+    presentationDetents: [.large]
 )
 ```
 
-`sheetHeight` controls the detent on iPhone: `.standard` (the default) covers 85% of the screen and leaves a sliver of the presenting view visible, `.full` uses the large detent. iPad always uses the large detent.
+| Option | Default | Purpose |
+| --- | --- | --- |
+| `nextButtonLabel` | `"Next"` | Localized accessibility label for the arrow button. |
+| `doneButtonLabel` | `"Done"` | Localized accessibility label for the checkmark button. |
+| `accentColor` | `.blue` | Tint for the action button and list symbols. |
+| `presentationDetents` | `nil` | Optional `Set<PresentationDetent>` that replaces the default sheet detents. |
+| `userDefaults` | `.standard` | Storage used to track the latest viewed app version. |
+
+The action button shows a symbol; its labels provide accessible, localized descriptions.
+
+When `presentationDetents` is `nil` or omitted, Notelet uses `[.fraction(0.85), .large]` on all devices. Pass a nonempty set to replace these defaults, for example `[.large]` for only the large detent or `[.medium, .large]` to offer two sizes. SwiftUI determines how each detent is presented in the current window and size class.
+
+## Migrating from 1.x
+
+Notelet 2.0 is a breaking API update:
+
+- Remove the `configuration: .init(...)` wrapper and pass `nextButtonLabel`, `doneButtonLabel`, and `accentColor` directly to `.noteletSheet()`.
+- Replace `sheetHeight: .full` with `presentationDetents: [.large]`.
+- Omit `presentationDetents` to use the new defaults, `[.fraction(0.85), .large]`. To offer only the former `.standard` height, pass `presentationDetents: [.fraction(0.85)]`. Detent overrides now apply to iPad as well as iPhone.
+
+Calls that use only `notes`, `version`, `onDismiss`, or `userDefaults` keep the same API.
 
 ## Latest viewed version storage
 
 When using `version: .current`, Notelet automatically marks the current version as seen by saving it to `UserDefaults`.
+
+To share this state with an extension, pass the same App Group `UserDefaults` to `.noteletSheet()` and the storage helpers:
+
+```swift
+let sharedDefaults = UserDefaults(suiteName: "group.com.example.myapp")!
+
+// On your view:
+.noteletSheet(notes: notes, version: .current, userDefaults: sharedDefaults)
+
+// When marking the current version as seen manually:
+NoteletStorage.markCurrentVersionAsSeen(userDefaults: sharedDefaults)
+```
 
 In some cases, you might also want to save it manually. For example, I don't want new users to see the release notes sheet right after onboarding, so when onboarding is done, I manually mark the current version as seen, and they only see release notes on the next update.
 
