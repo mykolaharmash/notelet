@@ -4,8 +4,7 @@
 
 ### Breaking changes
 
-- Removed `NoteletConfiguration`. Pass button labels and accent color directly to `.noteletSheet()`.
-- Removed `NoteletSheetHeight` and the `sheetHeight` option. The optional `presentationDetents: Set<PresentationDetent>?` parameter replaces it and overrides the default `[.fraction(0.85), .large]` detents on all devices.
+- Removed `NoteletSheetHeight` and the `sheetHeight` option from `NoteletConfiguration`. The optional `presentationDetents: Set<PresentationDetent>?` configuration option replaces it and overrides the default `[.fraction(0.85), .large]` detents on all devices.
 
 ### Layout improvements
 

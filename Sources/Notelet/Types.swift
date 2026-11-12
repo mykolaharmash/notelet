@@ -44,3 +44,30 @@ public enum NoteletPresentedVersion: Sendable, Hashable {
     case current
     case v(String)
 }
+
+public struct NoteletConfiguration: Sendable {
+    let nextButtonLabel: LocalizedStringResource
+    let doneButtonLabel: LocalizedStringResource
+    let accentColor: Color
+    let presentationDetents: Set<PresentationDetent>?
+
+    /// Customize the release-notes sheet.
+    ///
+    /// - Parameters:
+    ///   - nextButtonLabel: Localized accessibility label for the arrow button.
+    ///   - doneButtonLabel: Localized accessibility label for the checkmark button.
+    ///   - accentColor: Tint for the action button and list symbols.
+    ///   - presentationDetents: A nonempty set that replaces the default detents.
+    ///     Pass `nil` to use `[.fraction(0.85), .large]`.
+    public init(
+        nextButtonLabel: LocalizedStringResource = "Next",
+        doneButtonLabel: LocalizedStringResource = "Done",
+        accentColor: Color = .blue,
+        presentationDetents: Set<PresentationDetent>? = nil
+    ) {
+        self.nextButtonLabel = nextButtonLabel
+        self.doneButtonLabel = doneButtonLabel
+        self.accentColor = accentColor
+        self.presentationDetents = presentationDetents
+    }
+}
