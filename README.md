@@ -12,9 +12,7 @@
     <img src="https://img.shields.io/badge/iPhone Duo-07A62F.svg" />
 </p>
 
-<p align="center">
-  <video src="https://github.com/user-attachments/assets/bce35ecf-aa85-49fa-b736-67994230d147" controls muted playsinline height="600px" width="auto"></video>
-</p>
+https://github.com/user-attachments/assets/bce35ecf-aa85-49fa-b736-67994230d147
 
 > [!TIP]
 > Once you're done here, check my other project [AppView](https://appview.dev) to get an optimized website for your app. It will boost downloads coming from web search and AI suggestions.
