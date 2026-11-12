@@ -10,9 +10,9 @@ import SwiftUI
 struct NoteItemView: View {
     let item: NoteletVersionNoteItem
     let isCurrent: Bool
-    let configuration: NoteletConfiguration
+    let availableWidth: CGFloat
+    let accentColor: Color
 
-    @State private var containerSize: CGSize = .zero
     @State private var mediaLoadState: MediaNoteItemLoadState = .loading
 
     private var clipShapeRadius: Double {
@@ -28,14 +28,9 @@ struct NoteItemView: View {
             switch item {
             case .media(let mediaKind, let url, let title, let description):
                 VStack(alignment: .center, spacing: 12) {
-                    let mediaPadding = 16.0
-                    /**
-                     * 440 points is the largets iPhone width right now.
-                     * Clamping to that width so the media fits perfectly on
-                     * any iPhone and don't streatch to the full width on
-                     * iPads and iPhones in landscape orientation.
-                     */
-                    let containerWidth = min(max(containerSize.width, 300), 440)
+                    let mediaPadding: CGFloat = 16
+                    // Cap media on wide layouts while allowing it to shrink with the page.
+                    let mediaSize = max(0, min(availableWidth, 440) - mediaPadding * 2)
 
                     ZStack {
                         switch mediaKind {
@@ -53,17 +48,18 @@ struct NoteItemView: View {
                         }
                     }
                     .frame(
-                        width: containerWidth - mediaPadding * 2,
-                        height: containerWidth - mediaPadding * 2
+                        width: mediaSize,
+                        height: mediaSize
                     )
                     .clipShape(.rect(cornerRadius: clipShapeRadius))
-                    .shadow(color: .black.opacity(0.15), radius: 20, x: 0, y: 0)
+                    .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 5)
                     .padding(mediaPadding)
 
                     MediaNoteItemDetailsView(
                         title: title,
                         description: description
                     )
+                    .frame(maxWidth: mediaSize, alignment: .leading)
 
                     Spacer()
                 }
@@ -80,15 +76,9 @@ struct NoteItemView: View {
                 BulletListNoteItemView(
                     title: title,
                     rows: rows,
-                    accentColor: configuration.accentColor
+                    accentColor: accentColor
                 )
             }
-        }
-        .containerRelativeFrame(.horizontal, alignment: .center)
-        .onGeometryChange(for: CGSize.self) { proxy in
-            proxy.size
-        } action: { newSize in
-            containerSize = newSize
         }
     }
 

@@ -45,29 +45,29 @@ public enum NoteletPresentedVersion: Sendable, Hashable {
     case v(String)
 }
 
-/// How tall the sheet is on iPhone. iPad always uses the large detent.
-public enum NoteletSheetHeight: Sendable {
-    /// 85% of the screen, leaving a sliver of the presenting view visible.
-    case standard
-    /// The full large detent.
-    case full
-}
-
 public struct NoteletConfiguration: Sendable {
     let nextButtonLabel: LocalizedStringResource
     let doneButtonLabel: LocalizedStringResource
     let accentColor: Color
-    let sheetHeight: NoteletSheetHeight
-    
+    let presentationDetents: Set<PresentationDetent>?
+
+    /// Customize the release-notes sheet.
+    ///
+    /// - Parameters:
+    ///   - nextButtonLabel: Localized accessibility label for the arrow button.
+    ///   - doneButtonLabel: Localized accessibility label for the checkmark button.
+    ///   - accentColor: Tint for the action button and list symbols.
+    ///   - presentationDetents: A nonempty set that replaces the default detents.
+    ///     Pass `nil` to use `[.fraction(0.85), .large]`.
     public init(
         nextButtonLabel: LocalizedStringResource = "Next",
         doneButtonLabel: LocalizedStringResource = "Done",
         accentColor: Color = .blue,
-        sheetHeight: NoteletSheetHeight = .standard
+        presentationDetents: Set<PresentationDetent>? = nil
     ) {
         self.nextButtonLabel = nextButtonLabel
         self.doneButtonLabel = doneButtonLabel
         self.accentColor = accentColor
-        self.sheetHeight = sheetHeight
+        self.presentationDetents = presentationDetents
     }
 }

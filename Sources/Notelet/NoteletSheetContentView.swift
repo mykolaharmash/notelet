@@ -9,19 +9,19 @@ import SwiftUI
 
 struct NoteletSheetContentView: View {
     let versionNotes: [NoteletVersionNoteItem]
-    let configuration: NoteletConfiguration
+    let nextButtonLabel: LocalizedStringResource
+    let doneButtonLabel: LocalizedStringResource
+    let accentColor: Color
+    let presentationDetents: Set<PresentationDetent>?
 
     @State private var selectedPageID: Int? = 0
 
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     private var currentPage: Int {
         return selectedPageID ?? 0
-    }
-
-    private var isIPad: Bool {
-        UIDevice.current.userInterfaceIdiom == .pad
     }
 
     private var sheetBackgroundStyle: AnyShapeStyle {
@@ -36,86 +36,68 @@ struct NoteletSheetContentView: View {
 
     var body: some View {
         let isOnLastPage = isOnLastPage(versionNotes: versionNotes, currentPage: currentPage)
+        let buttonTitle = isOnLastPage ? doneButtonLabel : nextButtonLabel
 
-        NavigationStack {
-            ScrollView(.horizontal) {
-                HStack(alignment: .top, spacing: 0) {
-                    ForEach(Array(versionNotes.enumerated()), id: \.offset) { index, item in
-                        ScrollView(.vertical) {
-                            NoteItemView(
-                                item: item,
-                                isCurrent: index == currentPage,
-                                configuration: configuration
-                            )
-                            .id(index)
-                        }
-                        .contentMargins(.bottom, 80)
-                    }
-                }
-                .scrollTargetLayout()
-            }
-            .scrollTargetBehavior(.paging)
-            .scrollIndicators(.hidden)
-            .scrollPosition(id: $selectedPageID)
-            .modifier(SoftScrollEdgeEffect())
-        }
-        .modifier(
-            SafeAreaView {
-                VStack(spacing: 16) {
-                    if versionNotes.count > 1 {
-                        let selectedIndicatorColor = colorScheme == .light ? Color.black : Color.white
-                        let pageIndicatorAccessibilityLabel: LocalizedStringResource = "Page \(currentPage + 1) of \(versionNotes.count)"
-
-                        HStack(spacing: 6) {
-                            ForEach(versionNotes.indices, id: \.self) { index in
-                                Capsule()
-                                    .fill(index == currentPage ? selectedIndicatorColor.opacity(0.35) : Color.secondary.opacity(0.35))
-                                    .frame(width: index == currentPage ? 14 : 7, height: 7)
-                            }
-                        }
-                        .accessibilityElement(children: .ignore)
-                        .accessibilityLabel(Text(pageIndicatorAccessibilityLabel))
-                        .padding(.top, 14)
-                        .animation(.easeInOut(duration: 0.2), value: currentPage)
-                    }
-
-                    if !versionNotes.isEmpty {
-                        Button {
-                            if isOnLastPage {
-                                onDoneTap()
-                            } else {
-                                withAnimation(.smooth) {
-                                    selectedPageID = min(currentPage + 1, versionNotes.count - 1)
+        NoteletSheetContainer(
+            pageCount: versionNotes.count,
+            currentPage: currentPage,
+            actionButton: NoteletCircularActionButton(
+                title: buttonTitle,
+                systemImage: isOnLastPage ? "checkmark" : "arrow.forward",
+                accentColor: accentColor,
+                action: onAdvanceTap
+            )
+        ) {
+            GeometryReader { geometry in
+                ScrollViewReader { scrollProxy in
+                    ScrollView(.horizontal) {
+                        HStack(alignment: .top, spacing: 0) {
+                            ForEach(Array(versionNotes.enumerated()), id: \.offset) { index, item in
+                                ScrollView(.vertical) {
+                                    NoteItemView(
+                                        item: item,
+                                        isCurrent: index == currentPage,
+                                        availableWidth: geometry.size.width,
+                                        accentColor: accentColor
+                                    )
                                 }
+                                .contentMargins(.bottom, 80)
+                                .frame(width: geometry.size.width)
+                                .opacity(index == currentPage ? 1 : 0)
+                                .animation(.easeInOut(duration: 0.2), value: currentPage)
+                                .id(index)
                             }
-                        } label: {
-                            let buttonTitle: LocalizedStringResource = isOnLastPage
-                            ? configuration.doneButtonLabel
-                            : configuration.nextButtonLabel
-
-                            Text(buttonTitle)
-                                .fontWeight(.bold)
-                                .foregroundStyle(.primary)
-                                .padding(.vertical, 14)
-                                .frame(maxWidth: .infinity)
                         }
-                        .buttonStyle(.borderedProminent)
-                        .padding(.horizontal, 28)
-                        .tint(configuration.accentColor)
+                        .scrollTargetLayout()
+                        .onGeometryChange(for: CGFloat.self) { proxy in
+                            proxy.size.width
+                        } action: { width in
+                            guard width > 0 else { return }
+                            // Realign after the pages, rather than just the viewport, finish resizing.
+                            scrollProxy.scrollTo(currentPage, anchor: .leading)
+                        }
                     }
+                    // Align to the safe-area-sized page rather than the full scroll container.
+                    .scrollTargetBehavior(.viewAligned(limitBehavior: .always))
+                    .scrollIndicators(.hidden)
+                    .scrollPosition(id: $selectedPageID, anchor: .leading)
+                    .modifier(SoftScrollEdgeEffect())
                 }
-                .safeAreaPadding(.bottom, isIPad ? 24 : 0)
             }
-        )
-        .presentationDetents([
-            isIPad || configuration.sheetHeight == .full ? .large : .fraction(0.85)
-        ])
+        }
+        .presentationDetents(presentationDetents ?? [.fraction(0.85), .large])
         .presentationDragIndicator(.visible)
         .presentationBackground(sheetBackgroundStyle)
     }
 
-    private func onDoneTap() {
-        dismiss()
+    private func onAdvanceTap() {
+        if isOnLastPage(versionNotes: versionNotes, currentPage: currentPage) {
+            dismiss()
+        } else {
+            withAnimation(.smooth) {
+                selectedPageID = min(currentPage + 1, versionNotes.count - 1)
+            }
+        }
     }
 
     private func isOnLastPage(versionNotes: [NoteletVersionNoteItem], currentPage: Int) -> Bool {

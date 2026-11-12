@@ -23,9 +23,8 @@
 1. In Xcode, open your app project.
 2. Go to **File → Add Package Dependencies...**.
 3. Enter the repo URL https://github.com/mykolaharmash/notelet into the search.
-4. Click on "Add package".
+4. Choose **Up to Next Major Version** starting at **2.0.0**, then click on "Add package".
 5. Add `Notelet` to your app target.
-
 
 ## Usage
 
@@ -162,7 +161,7 @@ You may also want to show release notes for app versions other than the current 
 
 The list of release notes for each app version is an array of `NoteletVersionNotes` structs. Each struct specifies the `version` and `items`.
 
-You can have as many notes inside `items` for each version as needed, they will be arranged in a paging view with navigation either using the "Next" button or by swiping.
+You can have as many notes inside `items` for each version as needed. They are arranged in a paging view with progress indicator and a button to move forward. Users can also swipe between pages.
 
 The array can be a global constant or a static property on some top level view. I personally keep it in a global constant.
 
@@ -282,7 +281,7 @@ let RELEASE_NOTES: [NoteletVersionNotes] = [
 
 ## Additional configuration
 
-`.noteletSheet()` accepts an optional `NoteletConfiguration` struct where you can customize button labels, accent color and the sheet height.
+Pass a `NoteletConfiguration` to `.noteletSheet()` to customize button labels, accent color, and presentation detents:
 
 ```swift
 .noteletSheet(
@@ -292,12 +291,23 @@ let RELEASE_NOTES: [NoteletVersionNotes] = [
         nextButtonLabel: "Continue",
         doneButtonLabel: "Got it",
         accentColor: .orange,
-        sheetHeight: .full
+        presentationDetents: [.large]
     )
 )
 ```
 
-`sheetHeight` controls the detent on iPhone: `.standard` (the default) covers 85% of the screen and leaves a sliver of the presenting view visible, `.full` uses the large detent. iPad always uses the large detent.
+| Configuration option | Default | Purpose |
+| --- | --- | --- |
+| `nextButtonLabel` | `"Next"` | Localized accessibility label for the arrow button. |
+| `doneButtonLabel` | `"Done"` | Localized accessibility label for the checkmark button. |
+| `accentColor` | `.blue` | Tint for the action button and list symbols. |
+| `presentationDetents` | `nil` | Optional `Set<PresentationDetent>` that replaces the default sheet detents. |
+
+The separate `userDefaults` parameter on `.noteletSheet()` defaults to `.standard` and controls storage for the latest viewed app version.
+
+The action button shows a symbol; its labels provide accessible, localized descriptions.
+
+When `NoteletConfiguration.presentationDetents` is `nil` or omitted, Notelet uses `[.fraction(0.85), .large]` on all devices. Pass a nonempty set to replace these defaults, for example `[.large]` for only the large detent or `[.medium, .large]` to offer two sizes. SwiftUI determines how each detent is presented in the current window and size class.
 
 ## Latest viewed version storage
 

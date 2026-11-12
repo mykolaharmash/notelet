@@ -77,7 +77,10 @@ struct NoteletSheet: ViewModifier {
             .sheet(isPresented: $isPresented, onDismiss: handleDismiss) {
                 NoteletSheetContentView(
                     versionNotes: versionNotes,
-                    configuration: configuration
+                    nextButtonLabel: configuration.nextButtonLabel,
+                    doneButtonLabel: configuration.doneButtonLabel,
+                    accentColor: configuration.accentColor,
+                    presentationDetents: configuration.presentationDetents
                 )
             }
     }
@@ -94,11 +97,14 @@ struct NoteletSheet: ViewModifier {
 extension View {
     /// Attach a release-notes sheet to the modified view.
     ///
-    /// - Parameter userDefaults: Storage backing the "seen version" check used
-    ///   in `.current` presentation mode. Defaults to `.standard`. Pass an App
-    ///   Group `UserDefaults` (e.g. `UserDefaults(suiteName: "group.com.example.myapp")`)
-    ///   when the host app needs to share "seen" state with an extension
-    ///   target like a widget, intent, or share extension.
+    /// - Parameters:
+    ///   - notes: Release notes grouped by app version.
+    ///   - version: The app version to present. Pass `nil` to keep the sheet hidden.
+    ///   - onDismiss: Called when the sheet is dismissed.
+    ///   - configuration: Button labels, accent color, and optional detent overrides.
+    ///   - userDefaults: Storage backing the "seen version" check used in `.current`
+    ///     presentation mode. Defaults to `.standard`. Pass an App Group
+    ///     `UserDefaults` to share "seen" state with an extension.
     public func noteletSheet(
         notes: [NoteletVersionNotes],
         version: NoteletPresentedVersion? = nil,
