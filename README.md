@@ -26,12 +26,6 @@
 4. Choose **Up to Next Major Version** starting at **2.0.0**, then click on "Add package".
 5. Add `Notelet` to your app target.
 
-For a Swift package, add the dependency to `Package.swift`:
-
-```swift
-.package(url: "https://github.com/mykolaharmash/notelet", from: "2.0.0")
-```
-
 ## Usage
 
 Here is a full usage example with comments to get started quickly. Below are more detailed explanations of how the component works and all available APIs.
