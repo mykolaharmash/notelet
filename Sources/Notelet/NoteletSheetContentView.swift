@@ -15,6 +15,7 @@ struct NoteletSheetContentView: View {
 
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     private var currentPage: Int {
         return selectedPageID ?? 0
@@ -36,9 +37,21 @@ struct NoteletSheetContentView: View {
 
     var body: some View {
         let isOnLastPage = isOnLastPage(versionNotes: versionNotes, currentPage: currentPage)
+        let buttonTitle = isOnLastPage ? configuration.doneButtonLabel : configuration.nextButtonLabel
 
-        NavigationStack {
+        NoteletSheetContainer(
+            pageCount: versionNotes.count,
+            currentPage: currentPage,
+            actionButton: NoteletCircularActionButton(
+                title: buttonTitle,
+                systemImage: isOnLastPage ? "checkmark" : "arrow.forward",
+                accentColor: configuration.accentColor,
+                action: onAdvanceTap
+            )
+        ) {
             GeometryReader { geometry in
+                let _ = print(geometry.size.width)
+                
                 ScrollViewReader { scrollProxy in
                     ScrollView(.horizontal) {
                         HStack(alignment: .top, spacing: 0) {
@@ -75,60 +88,6 @@ struct NoteletSheetContentView: View {
                 }
             }
         }
-        .modifier(
-            SafeAreaView {
-                VStack(spacing: 16) {
-                    if versionNotes.count > 1 {
-                        let pageIndicatorAccessibilityLabel: LocalizedStringResource = "Page \(currentPage + 1) of \(versionNotes.count)"
-
-                        HStack(spacing: 6) {
-                            ForEach(versionNotes.indices, id: \.self) { index in
-                                /**
-                                 * Use symbols instead of Circle views because
-                                 * iOS 27 did not consider Circle for the scroll edge
-                                 * effect didn't extent the blur to the full safe area
-                                 * height
-                                 */
-                                Image(systemName: "circle.fill")
-                                    .font(.system(size: 7))
-                                    .foregroundStyle(Color.primary.opacity(index == currentPage ? 0.65 : 0.2))
-                                    .frame(width: 7, height: 7)
-                            }
-                        }
-                        .accessibilityElement(children: .ignore)
-                        .accessibilityLabel(Text(pageIndicatorAccessibilityLabel))
-                        .padding(.top, 14)
-                        .animation(.easeInOut(duration: 0.2), value: currentPage)
-                    }
-
-                    if !versionNotes.isEmpty {
-                        Button {
-                            if isOnLastPage {
-                                onDoneTap()
-                            } else {
-                                withAnimation(.smooth) {
-                                    selectedPageID = min(currentPage + 1, versionNotes.count - 1)
-                                }
-                            }
-                        } label: {
-                            let buttonTitle: LocalizedStringResource = isOnLastPage
-                            ? configuration.doneButtonLabel
-                            : configuration.nextButtonLabel
-
-                            Text(buttonTitle)
-                                .fontWeight(.bold)
-                                .foregroundStyle(.primary)
-                                .padding(.vertical, 14)
-                                .frame(maxWidth: .infinity)
-                        }
-                        .buttonStyle(.borderedProminent)
-                        .padding(.horizontal, 28)
-                        .tint(configuration.accentColor)
-                    }
-                }
-                .safeAreaPadding(.bottom, isIPad ? 24 : 0)
-            }
-        )
         .presentationDetents([
             isIPad || configuration.sheetHeight == .full ? .large : .fraction(0.85)
         ])
@@ -136,8 +95,14 @@ struct NoteletSheetContentView: View {
         .presentationBackground(sheetBackgroundStyle)
     }
 
-    private func onDoneTap() {
-        dismiss()
+    private func onAdvanceTap() {
+        if isOnLastPage(versionNotes: versionNotes, currentPage: currentPage) {
+            dismiss()
+        } else {
+            withAnimation(.smooth) {
+                selectedPageID = min(currentPage + 1, versionNotes.count - 1)
+            }
+        }
     }
 
     private func isOnLastPage(versionNotes: [NoteletVersionNoteItem], currentPage: Int) -> Bool {
