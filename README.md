@@ -13,6 +13,8 @@
     <img src="https://img.shields.io/badge/macOS-14.0+-555555.svg" />
 </p>
 
+<p align="center">Give the repo a <a href="https://github.com/mykolaharmash/notelet">⭐️</a> if you find it useful. It helps!</p>
+
 https://github.com/user-attachments/assets/bce35ecf-aa85-49fa-b736-67994230d147
 
 > [!TIP]
